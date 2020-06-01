@@ -1,6 +1,5 @@
 ﻿// fprintf(fp,"%s",Str); //寫入檔案
 // strcat,sprintf,atoi
-// just for practicing commit to master. 
 #include <iostream>
 #include <cstring>
 #include <string>
@@ -58,10 +57,10 @@ int main(int argc, char** argv)
 	}
 	fprintf(lst, "Loc.	Source statement\n=====	==================================\n");
 	int cnt = 0;
-
+	int type = -1;
 	while (!feof(fp))
 	{
-		int type = -1;
+	
 		int count = 0;
 		char loc_char[100];
 		fgets(StrLine, 50, fp);  //讀取一行
@@ -72,14 +71,26 @@ int main(int argc, char** argv)
 			fprintf(lst, "\t%s", StrLine);
 			count = count + 1;
 		}
+		if (cnt > 1 && type != 5 && type!=6)
+		{
+			fprintf(lst, "%05X	", loc);
+			fprintf(lst, "%s", StrLine);
+			//printf("strline:%s",StrLine);
+			//printf("type:%d\n", type);
+		}
 		strncpy(StrLine_copy, StrLine, 50);
-		token = strtok(StrLine, "\t");   /* get the first token */
+		/* get the first token */
+		token = strtok(StrLine, "\t");
+		if (strcmp(token, "END") == 0) {
+			
+			fprintf(lst, "	END FIRST\n");
+			printf("123\n");
+		}
+		type = -1;
 		while (token != NULL)
 		{	
-			if (cnt > 1 && type != 5)
-			{
-				fprintf(lst, "%05X	", loc);
-				fprintf(lst, "%s", StrLine);
+			if (cnt == 51) {
+				printf("%s\n", token);
 			}
 			if (strcmp(token, "START") == 0) {
 				type = 0; 
@@ -104,10 +115,12 @@ int main(int argc, char** argv)
 			else if (strcmp(token, "END") == 0) {
 				type = 6;
 				count = count + 1;
+				printf("456");
 			}
 			else if (type == 0) {
 				loc = strtol(token, NULL, 16);
 				sprintf(loc_char, "%d", loc);
+				type = -1;
 			}
 			else if (type == 1) {
 				if (token[0] == 'X') {
@@ -139,20 +152,18 @@ int main(int argc, char** argv)
 			token = strtok(NULL, "\t");
 			
 		}
-		
-		if (cnt == 1 && type != 5)
-		{
+		if (cnt == 1 && type != 5){
 			fprintf(lst, "%05X	", loc);
 			fprintf(lst, "%s", StrLine_copy);
 		}
-		if (cnt ==53)
-		{
-			break;
-		}
-		
 		if (count == 0) {
 			loc = loc + 3;
 		}
+		//if (cnt == 52){
+			//break;
+		//}
+
+		
 	}
 
 	fclose(fp);

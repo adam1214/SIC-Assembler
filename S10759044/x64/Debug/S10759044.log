@@ -1,4 +1,4 @@
 ﻿  SICASM.cpp
-c:\users\88691\desktop\s10759044\s10759044\sicasm.cpp(116): warning C4267: '正在初始化': 將 'size_t' 轉換為 'int'，資料可能遺失
+c:\users\88691\desktop\s10759044\s10759044\sicasm.cpp(130): warning C4267: '正在初始化': 將 'size_t' 轉換為 'int'，資料可能遺失
 c:\users\88691\desktop\s10759044\s10759044\sicasm.cpp(26): warning C4101: 'stb': 未參考的區域變數
   S10759044.vcxproj -> C:\Users\88691\Desktop\S10759044\x64\Debug\S10759044.exe
