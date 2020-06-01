@@ -1,16 +1,14 @@
-﻿// fprintf(fp,"%s",Str); //寫入檔案
-// strcat,sprintf,atoi
-#include <iostream>
+﻿#include <iostream>
 #include <cstring>
 #include <string>
 #include <stdlib.h>
 #include <stdio.h>
 #include <vector> 
 
-using namespace std; 
+using namespace std;
 
 int main(int argc, char** argv)
-{	
+{
 	char output_lst[35] = "output/";
 	char output_obj[35] = "output/";
 	char output_stb[35] = "output/";
@@ -49,7 +47,7 @@ int main(int argc, char** argv)
 	char StrLine[50];   //每行最大讀取的字元數
 	char StrLine_copy[50];
 	char* token = NULL;
-	if((fp = fopen(filename, "r")) == NULL) //判斷檔案是否存在及可讀
+	if ((fp = fopen(filename, "r")) == NULL) //判斷檔案是否存在及可讀
 	{
 		printf("error!");
 		system("pause");
@@ -60,40 +58,40 @@ int main(int argc, char** argv)
 	int type = -1;
 	while (!feof(fp))
 	{
-	
+
 		int count = 0;
 		char loc_char[100];
 		fgets(StrLine, 50, fp);  //讀取一行
 		++cnt;
-		if (StrLine[0] == '.')
+
+		strncpy(StrLine_copy, StrLine, 50);
+		token = strtok(StrLine, "\t"); /* get the first token */
+
+		if (StrLine_copy[0] == '.')
 		{
 			type = 5;
-			fprintf(lst, "\t%s", StrLine);
+			fprintf(lst, "\t%s", StrLine_copy);
 			count = count + 1;
 		}
-		if (cnt > 1 && type != 5 && type!=6)
+		if (cnt > 1 && type != 5 && type != 6)
 		{
-			fprintf(lst, "%05X	", loc);
-			fprintf(lst, "%s", StrLine);
+			if (strcmp(token, "END") != 0)
+			{
+				fprintf(lst, "%05X	", loc);
+			}
+			fprintf(lst, "%s", StrLine_copy);
 			//printf("strline:%s",StrLine);
 			//printf("type:%d\n", type);
 		}
-		strncpy(StrLine_copy, StrLine, 50);
-		/* get the first token */
-		token = strtok(StrLine, "\t");
-		if (strcmp(token, "END") == 0) {
-			
-			fprintf(lst, "	END FIRST\n");
-			printf("123\n");
-		}
+
 		type = -1;
 		while (token != NULL)
-		{	
+		{
 			if (cnt == 51) {
 				printf("%s\n", token);
 			}
 			if (strcmp(token, "START") == 0) {
-				type = 0; 
+				type = 0;
 				count = count + 1;
 			}
 			else if (strcmp(token, "BYTE") == 0) {
@@ -147,12 +145,11 @@ int main(int argc, char** argv)
 				loc = loc + i;
 				type = -1;
 			}
-			
+
 			/* walk through other tokens */
 			token = strtok(NULL, "\t");
-			
 		}
-		if (cnt == 1 && type != 5){
+		if (cnt == 1 && type != 5) {
 			fprintf(lst, "%05X	", loc);
 			fprintf(lst, "%s", StrLine_copy);
 		}
@@ -160,10 +157,8 @@ int main(int argc, char** argv)
 			loc = loc + 3;
 		}
 		//if (cnt == 52){
-			//break;
+		//break;
 		//}
-
-		
 	}
 
 	fclose(fp);
