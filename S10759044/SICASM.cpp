@@ -80,16 +80,12 @@ int main(int argc, char** argv)
 				fprintf(lst, "%05X	", loc);
 			}
 			fprintf(lst, "%s", StrLine_copy);
-			//printf("strline:%s",StrLine);
-			//printf("type:%d\n", type);
+			
 		}
 
 		type = -1;
 		while (token != NULL)
 		{
-			if (cnt == 51) {
-				printf("%s\n", token);
-			}
 			if (strcmp(token, "START") == 0) {
 				type = 0;
 				count = count + 1;
@@ -113,7 +109,6 @@ int main(int argc, char** argv)
 			else if (strcmp(token, "END") == 0) {
 				type = 6;
 				count = count + 1;
-				printf("456");
 			}
 			else if (type == 0) {
 				loc = strtol(token, NULL, 16);
