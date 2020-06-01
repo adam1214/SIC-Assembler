@@ -1,6 +1,6 @@
 ﻿// fprintf(fp,"%s",Str); //寫入檔案
 // strcat,sprintf,atoi
-
+// just for practicing commit to master. 
 #include <iostream>
 #include <cstring>
 #include <string>
