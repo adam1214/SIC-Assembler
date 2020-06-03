@@ -4,8 +4,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <vector> 
+#include <sstream>
 
 using namespace std;
+string int2str(int i);
 
 int main(int argc, char** argv)
 {
@@ -24,7 +26,7 @@ int main(int argc, char** argv)
 	FILE *ob, *lst, *stb;
 	lst = fopen(output_lst, "w");
 	int mode;
-	long loc = -1;
+	int loc = -1;
 	if (argc == 2)
 	{
 		mode = 0;
@@ -44,6 +46,7 @@ int main(int argc, char** argv)
 	}
 	char filename[] = "input/test.asm"; //檔名
 	FILE *fp;
+	
 	char StrLine[50];   //每行最大讀取的字元數
 	char StrLine_copy[50];
 	char* token = NULL;
@@ -56,22 +59,57 @@ int main(int argc, char** argv)
 	fprintf(lst, "Loc.	Source statement\n=====	==================================\n");
 	int cnt = 0;
 	int type = -1;
-	while (!feof(fp))
+	int index = 0;
+	int j = 0;
+	string stbloc;
+	vector<vector<string> > table;
+	table.resize(100);
+	for (int i = 0; i < 100; i++)
 	{
-
+		table[i].resize(100);
+	}
+	for (int i = 0; i < 100; i++)
+	{
+		for (int j = 0; j < 100; j++)
+		{
+			table[i][j].clear();
+			table[i][j].append("0");
+		}
+	}
+	while (!feof(fp))
+	{	
 		int count = 0;
+		int count1 = 0;
 		char loc_char[100];
 		fgets(StrLine, 50, fp);  //讀取一行
 		++cnt;
-
 		strncpy(StrLine_copy, StrLine, 50);
 		token = strtok(StrLine, "\t"); /* get the first token */
-
+		if (StrLine_copy[0] != '\t' && StrLine_copy[0]!='.') {
+			string token_string(token);
+			table[0][index].clear();
+			table[0][index].append(token_string);
+			if (cnt > 1)
+			{
+				for (int k = 1; k < 100; k++)
+				{
+					if ("0" == table[k][index])
+					{
+						string loc_string = int2str(loc);
+						table[k][index].clear();
+						table[k][index].append(loc_string);
+						break;
+					}
+				}
+			}
+			index++;
+		}
 		if (StrLine_copy[0] == '.')
 		{
 			type = 5;
 			fprintf(lst, "\t%s", StrLine_copy);
 			count = count + 1;
+
 		}
 		if (cnt > 1 && type != 5 && type != 6)
 		{
@@ -80,12 +118,11 @@ int main(int argc, char** argv)
 				fprintf(lst, "%05X	", loc);
 			}
 			fprintf(lst, "%s", StrLine_copy);
-			
 		}
-
 		type = -1;
 		while (token != NULL)
-		{
+		{	
+			
 			if (strcmp(token, "START") == 0) {
 				type = 0;
 				count = count + 1;
@@ -144,20 +181,35 @@ int main(int argc, char** argv)
 			/* walk through other tokens */
 			token = strtok(NULL, "\t");
 		}
-		if (cnt == 1 && type != 5) {
+		if (cnt == 1 && type != 5 && count1 == 1) {
 			fprintf(lst, "%05X	", loc);
 			fprintf(lst, "%s", StrLine_copy);
 		}
 		if (count == 0) {
-			loc = loc + 3;
+			loc = loc + 3; 
 		}
 		//if (cnt == 52){
 		//break;
 		//}
 	}
 
-	fclose(fp);
-	fclose(lst);
+	//fclose(fp);
+	//fclose(lst);
+	for (int i = 0; i < 10; i++)
+	{
+		for (int j = 0; j < 10; j++)
+		{
+			cout << table[i][j] << " ";
+		}
+		printf("\n");
+	}
 	system("pause");
 	return 0;
+}
+string int2str(int i) 
+{
+	string s;
+	stringstream ss(s);
+	ss << i;
+	return ss.str();
 }
