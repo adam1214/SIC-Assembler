@@ -89,6 +89,11 @@ int main(int argc, char** argv)
 			string token_string(token);
 			table[0][index].clear();
 			table[0][index].append(token_string);
+			if (index == 1) {
+				string loc_string = int2str(loc);
+				table[1][0].clear();
+				table[1][0].append(loc_string);
+			}
 			if (cnt > 1)
 			{
 				for (int k = 1; k < 100; k++)
@@ -119,6 +124,7 @@ int main(int argc, char** argv)
 			}
 			fprintf(lst, "%s", StrLine_copy);
 		}
+		
 		type = -1;
 		while (token != NULL)
 		{	
@@ -188,6 +194,7 @@ int main(int argc, char** argv)
 		if (count == 0) {
 			loc = loc + 3; 
 		}
+		
 		//if (cnt == 52){
 		//break;
 		//}
