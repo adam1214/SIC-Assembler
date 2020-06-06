@@ -5,10 +5,14 @@
 #include <stdio.h>
 #include <vector> 
 #include <sstream>
+#include <iomanip> 
 
 using namespace std;
-string int2str(int i);
 
+vector<vector<string> > table;
+int index = 0;
+string int2str(int i);
+void table_check_and_insert(char* token, int cnt, int loc);
 int main(int argc, char** argv)
 {
 	char output_lst[35] = "output/";
@@ -59,16 +63,14 @@ int main(int argc, char** argv)
 	fprintf(lst, "Loc.	Source statement\n=====	==================================\n");
 	int cnt = 0;
 	int type = -1;
-	int index = 0;
 	int j = 0;
 	string stbloc;
-	vector<vector<string> > table;
-	table.resize(100);
-	for (int i = 0; i < 100; i++)
+	table.resize(10);
+	for (int i = 0; i < 10; i++)
 	{
 		table[i].resize(100);
 	}
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < 10; i++)
 	{
 		for (int j = 0; j < 100; j++)
 		{
@@ -85,15 +87,17 @@ int main(int argc, char** argv)
 		++cnt;
 		strncpy(StrLine_copy, StrLine, 50);
 		token = strtok(StrLine, "\t"); /* get the first token */
-		if (StrLine_copy[0] != '\t' && StrLine_copy[0]!='.') {
+		if (cnt == 2) {
+			string loc_string = int2str(loc);
+			table[1][0].clear();
+			table[1][0].append(loc_string);
+		}
+		if (StrLine_copy[0] != '\t' && StrLine_copy[0] != '.') {
+			table_check_and_insert(token, cnt, loc);
+			/*
 			string token_string(token);
 			table[0][index].clear();
 			table[0][index].append(token_string);
-			if (index == 1) {
-				string loc_string = int2str(loc);
-				table[1][0].clear();
-				table[1][0].append(loc_string);
-			}
 			if (cnt > 1)
 			{
 				for (int k = 1; k < 100; k++)
@@ -108,6 +112,7 @@ int main(int argc, char** argv)
 				}
 			}
 			index++;
+			*/
 		}
 		if (StrLine_copy[0] == '.')
 		{
@@ -128,8 +133,16 @@ int main(int argc, char** argv)
 		type = -1;
 		while (token != NULL)
 		{	
-			
-			if (strcmp(token, "START") == 0) {
+			if (strcmp(token, "JSUB") == 0 || strcmp(token, "JGT") == 0 || strcmp(token, "JLT") == 0 || strcmp(token, "JEQ") == 0) 
+			{
+				type = 7;
+			}
+			else if (type == 7) 
+			{
+				table_check_and_insert(token, cnt, loc);
+				type = -1;
+			}
+			else if (strcmp(token, "START") == 0) {
 				type = 0;
 				count = count + 1;
 			}
@@ -204,9 +217,9 @@ int main(int argc, char** argv)
 	//fclose(lst);
 	for (int i = 0; i < 10; i++)
 	{
-		for (int j = 0; j < 10; j++)
+		for (int j = 0; j < 17; j++)
 		{
-			cout << table[i][j] << " ";
+			cout << setw(7) << right << table[i][j];
 		}
 		printf("\n");
 	}
@@ -219,4 +232,55 @@ string int2str(int i)
 	stringstream ss(s);
 	ss << i;
 	return ss.str();
+}
+void table_check_and_insert(char* token, int cnt, int loc)
+{
+	int exist_or_not = 0;
+	char dest[10] = { 0 };
+	strncpy(dest, token, strlen(token));
+	for (int i = 0; i < 100; i++)//第一列陣列橫向搜索
+	{
+		if (token[strlen(token) - 1] == '\n')
+		{
+			memset(dest, '\0', 10);
+			strncpy(dest, token, strlen(token) - 1);
+		}
+		if (table[0][i] == dest)//如果已經有symbol就填loc
+		{
+			for (int k = 1; k < 10; k++)
+			{
+				if ("0" == table[k][i])
+				{
+					string loc_string = int2str(loc);
+					table[k][i].clear();
+					table[k][i].append(loc_string);
+					exist_or_not = 1;
+					//cout << loc_string << endl;
+					break;
+				}
+			}
+		}
+		if (exist_or_not == 1)
+		{
+			break;
+		}
+	}
+	if (exist_or_not == 0) //如果還未出現此symbol先填symbol再填loc
+	{
+		//cout << "not exist in table yet:" << dest << " " << cnt << endl;
+		string token_string(dest);
+		table[0][index].clear();
+		table[0][index].append(token_string);
+		for (int k = 1; k < 10; k++)
+		{
+			if ("0" == table[k][index])
+			{
+				string loc_string = int2str(loc);
+				table[k][index].clear();
+				table[k][index].append(loc_string);
+				break;
+			}
+		}
+		index++;
+	}
 }
