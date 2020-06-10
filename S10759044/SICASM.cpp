@@ -9,10 +9,11 @@
 
 using namespace std;
 
+int true_address[100] = { 0 };
 vector<vector<string> > table;
 int index = 0;
 string int2str(int i);
-void table_check_and_insert(char* token, int cnt, int loc);
+void table_check_and_insert(char* token, int cnt, int loc, int mode);
 int main(int argc, char** argv)
 {
 	char output_lst[35] = "output/";
@@ -93,7 +94,7 @@ int main(int argc, char** argv)
 			table[1][0].append(loc_string);
 		}
 		if (StrLine_copy[0] != '\t' && StrLine_copy[0] != '.') {
-			table_check_and_insert(token, cnt, loc);
+			table_check_and_insert(token, cnt, loc, 1);
 			/*
 			string token_string(token);
 			table[0][index].clear();
@@ -139,7 +140,7 @@ int main(int argc, char** argv)
 			}
 			else if (type == 7) 
 			{
-				table_check_and_insert(token, cnt, loc);
+				table_check_and_insert(token, cnt, loc, 2);
 				type = -1;
 			}
 			else if (strcmp(token, "START") == 0) {
@@ -213,8 +214,8 @@ int main(int argc, char** argv)
 		//}
 	}
 
-	//fclose(fp);
-	//fclose(lst);
+	fclose(fp);
+	fclose(lst);
 	for (int i = 0; i < 10; i++)
 	{
 		for (int j = 0; j < 17; j++)
@@ -223,7 +224,31 @@ int main(int argc, char** argv)
 		}
 		printf("\n");
 	}
+
+	for (int i = 0; i < 16; i++)
+	{
+		cout << true_address[i] << " " ;
+	}
+	stb = fopen(output_stb, "w");
+	for (int j = 0; j < 100; j++) 
+	{	
+		if (table[0][j] == "0") 
+		{
+			break;
+		}
+		else
+		{	
+			int i = true_address[j];
+			int integer;
+			cout << table[0][j] << "	" ;
+			cout << table[i][j] << endl;
+			fprintf(stb, "%s	", table[0][j]);
+			integer = std::stoi(table[i][j]);
+			fprintf(stb, "%X\n", integer);
+		}
+	}
 	system("pause");
+	fclose(stb);
 	return 0;
 }
 string int2str(int i) 
@@ -233,7 +258,7 @@ string int2str(int i)
 	ss << i;
 	return ss.str();
 }
-void table_check_and_insert(char* token, int cnt, int loc)
+void table_check_and_insert(char* token, int cnt, int loc, int mode)
 {
 	int exist_or_not = 0;
 	char dest[10] = { 0 };
@@ -254,6 +279,10 @@ void table_check_and_insert(char* token, int cnt, int loc)
 					string loc_string = int2str(loc);
 					table[k][i].clear();
 					table[k][i].append(loc_string);
+
+					if(mode == 1)
+						true_address[i] = k;
+
 					exist_or_not = 1;
 					//cout << loc_string << endl;
 					break;
@@ -278,6 +307,10 @@ void table_check_and_insert(char* token, int cnt, int loc)
 				string loc_string = int2str(loc);
 				table[k][index].clear();
 				table[k][index].append(loc_string);
+
+				if (mode == 1) 
+					true_address[index] = k;
+
 				break;
 			}
 		}
