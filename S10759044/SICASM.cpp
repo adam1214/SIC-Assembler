@@ -9,11 +9,26 @@
 
 using namespace std;
 
+struct node {
+	char symbol[20];
+	int value;
+	struct node* next;
+};
+
+struct node* HEAD = NULL;
+struct node* TAIL = NULL;
+int node_cnt = 0;
+
 int true_address[100] = { 0 };
 vector<vector<string> > table;
 int index = 0;
 string int2str(int i);
 void table_check_and_insert(char* token, int cnt, int loc, int mode);
+void Push(char symbol[], int symbol_len, int value);
+void printList();
+void insertionSort();
+void sortedInsert(struct node** head_ref, struct node* new_node);
+
 int main(int argc, char** argv)
 {
 	char output_lst[35] = "output/";
@@ -51,7 +66,7 @@ int main(int argc, char** argv)
 	}
 	char filename[] = "input/test.asm"; //檔名
 	FILE *fp;
-	
+
 	char StrLine[50];   //每行最大讀取的字元數
 	char StrLine_copy[50];
 	char* token = NULL;
@@ -80,7 +95,7 @@ int main(int argc, char** argv)
 		}
 	}
 	while (!feof(fp))
-	{	
+	{
 		int count = 0;
 		int count1 = 0;
 		char loc_char[100];
@@ -101,16 +116,16 @@ int main(int argc, char** argv)
 			table[0][index].append(token_string);
 			if (cnt > 1)
 			{
-				for (int k = 1; k < 100; k++)
-				{
-					if ("0" == table[k][index])
-					{
-						string loc_string = int2str(loc);
-						table[k][index].clear();
-						table[k][index].append(loc_string);
-						break;
-					}
-				}
+			for (int k = 1; k < 100; k++)
+			{
+			if ("0" == table[k][index])
+			{
+			string loc_string = int2str(loc);
+			table[k][index].clear();
+			table[k][index].append(loc_string);
+			break;
+			}
+			}
 			}
 			index++;
 			*/
@@ -130,15 +145,15 @@ int main(int argc, char** argv)
 			}
 			fprintf(lst, "%s", StrLine_copy);
 		}
-		
+
 		type = -1;
 		while (token != NULL)
-		{	
-			if (strcmp(token, "JSUB") == 0 || strcmp(token, "JGT") == 0 || strcmp(token, "JLT") == 0 || strcmp(token, "JEQ") == 0) 
+		{
+			if (strcmp(token, "JSUB") == 0 || strcmp(token, "JGT") == 0 || strcmp(token, "JLT") == 0 || strcmp(token, "JEQ") == 0)
 			{
 				type = 7;
 			}
-			else if (type == 7) 
+			else if (type == 7)
 			{
 				table_check_and_insert(token, cnt, loc, 2);
 				type = -1;
@@ -206,16 +221,14 @@ int main(int argc, char** argv)
 			fprintf(lst, "%s", StrLine_copy);
 		}
 		if (count == 0) {
-			loc = loc + 3; 
+			loc = loc + 3;
 		}
-		
+
 		//if (cnt == 52){
 		//break;
 		//}
 	}
 
-	fclose(fp);
-	fclose(lst);
 	for (int i = 0; i < 10; i++)
 	{
 		for (int j = 0; j < 17; j++)
@@ -225,33 +238,41 @@ int main(int argc, char** argv)
 		printf("\n");
 	}
 
-	for (int i = 0; i < 16; i++)
-	{
-		cout << true_address[i] << " " ;
-	}
 	stb = fopen(output_stb, "w");
-	for (int j = 0; j < 100; j++) 
-	{	
-		if (table[0][j] == "0") 
+	for (int j = 0; j < 100; j++)
+	{
+		if (table[0][j] == "0")
 		{
 			break;
 		}
 		else
-		{	
+		{
 			int i = true_address[j];
 			int integer;
-			cout << table[0][j] << "	" ;
-			cout << table[i][j] << endl;
-			fprintf(stb, "%s	", table[0][j]);
-			integer = std::stoi(table[i][j]);
-			fprintf(stb, "%X\n", integer);
+
+			char cstr[20];
+			strcpy(cstr, table[0][j].c_str());
+			int value = std::stoi(table[i][j]);
+			Push(cstr, strlen(cstr), value);
 		}
 	}
-	system("pause");
+	insertionSort();
+	printList();
+	fprintf(stb, "Symbol	Value\n======	======\n");
+	struct node *temp = HEAD;
+	while (temp != NULL)
+	{
+		fprintf(stb, "%s	%05X\n", temp->symbol, temp->value);
+		temp = temp->next;
+	}
+
 	fclose(stb);
+	fclose(fp);
+	fclose(lst);
+	system("pause");
 	return 0;
 }
-string int2str(int i) 
+string int2str(int i)
 {
 	string s;
 	stringstream ss(s);
@@ -280,7 +301,7 @@ void table_check_and_insert(char* token, int cnt, int loc, int mode)
 					table[k][i].clear();
 					table[k][i].append(loc_string);
 
-					if(mode == 1)
+					if (mode == 1)
 						true_address[i] = k;
 
 					exist_or_not = 1;
@@ -308,12 +329,97 @@ void table_check_and_insert(char* token, int cnt, int loc, int mode)
 				table[k][index].clear();
 				table[k][index].append(loc_string);
 
-				if (mode == 1) 
+				if (mode == 1)
 					true_address[index] = k;
 
 				break;
 			}
 		}
 		index++;
+	}
+}
+void Push(char symbol[], int symbol_len, int value)
+{
+	if (HEAD == NULL) {
+		HEAD = (struct node*)malloc(sizeof(struct node));
+		for (int i = 0; i < symbol_len; i++)
+		{
+			HEAD->symbol[i] = symbol[i];
+		}
+		HEAD->symbol[symbol_len] = '\0';
+		HEAD->value = value;
+		HEAD->next = NULL;
+		TAIL = HEAD;
+	}
+	else {
+		struct node* ptr = (struct node*)malloc(sizeof(struct node));
+		for (int i = 0; i < symbol_len; i++)
+		{
+			ptr->symbol[i] = symbol[i];
+		}
+		ptr->symbol[symbol_len] = '\0';
+		ptr->value = value;
+		ptr->next = NULL;
+		TAIL->next = ptr;
+		TAIL = ptr;
+	}
+	node_cnt++;
+}
+void printList()
+{
+	struct node *temp = HEAD;
+	while (temp != NULL)
+	{
+		printf("%s	%d\n", temp->symbol, temp->value);
+		temp = temp->next;
+	}
+}
+// function to sort a singly linked list using insertion sort 
+void insertionSort()
+{
+	// Initialize sorted linked list 
+	struct node *sorted = NULL;
+
+	// Traverse the given linked list and insert every 
+	// node to sorted 
+	struct node *current = HEAD;
+	while (current != NULL)
+	{
+		// Store next for next iteration 
+		struct node *next = current->next;
+
+		// insert current in sorted linked list 
+		sortedInsert(&sorted, current);
+
+		// Update current 
+		current = next;
+	}
+
+	// Update HEAD to point to sorted linked list 
+	HEAD = sorted;
+}
+
+/* function to insert a new_node in a list. Note that this
+function expects a pointer to head_ref as this can modify the
+head of the input linked list (similar to push())*/
+void sortedInsert(struct node** head_ref, struct node* new_node)
+{
+	struct node* current;
+	/* Special case for the head end */
+	if (*head_ref == NULL || (*head_ref)->value > new_node->value)
+	{
+		new_node->next = *head_ref;
+		*head_ref = new_node;
+	}
+	else
+	{
+		/* Locate the node before the point of insertion */
+		current = *head_ref;
+		while (current->next != NULL && current->next->value <= new_node->value)
+		{
+			current = current->next;
+		}
+		new_node->next = current->next;
+		current->next = new_node;
 	}
 }
