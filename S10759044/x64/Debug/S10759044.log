@@ -1,8 +1,5 @@
 ﻿  SICASM.cpp
-c:\users\88691\desktop\s10759044\s10759044\sicasm.cpp(180): warning C4267: '正在初始化': 將 'size_t' 轉換為 'int'，資料可能遺失
-c:\users\88691\desktop\s10759044\s10759044\sicasm.cpp(245): warning C4477: 'fprintf' : 格式字串 '%s' 需要 'char *' 類型的引數，但 variadic 引數 1 的類型為 '_Ty'
-          with
-          [
-              _Ty=std::string
-          ]
+c:\users\88691\desktop\s10759044\s10759044\sicasm.cpp(198): warning C4267: '正在初始化': 將 'size_t' 轉換為 'int'，資料可能遺失
+c:\users\88691\desktop\s10759044\s10759044\sicasm.cpp(315): warning C4267: '引數': 將 'size_t' 轉換為 'int'，資料可能遺失
+c:\users\88691\desktop\s10759044\s10759044\sicasm.cpp(348): warning C4267: '引數': 將 'size_t' 轉換為 'int'，資料可能遺失
   S10759044.vcxproj -> C:\Users\88691\Desktop\S10759044\x64\Debug\S10759044.exe

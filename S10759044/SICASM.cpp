@@ -107,6 +107,9 @@ int main(int argc, char** argv)
 			string loc_string = int2str(loc);
 			table[1][0].clear();
 			table[1][0].append(loc_string);
+
+			//更改cnt == 1在linked-list第一個node->value
+			HEAD->value = loc;
 		}
 		if (StrLine_copy[0] != '\t' && StrLine_copy[0] != '.') {
 			table_check_and_insert(token, cnt, loc, 1);
@@ -239,6 +242,7 @@ int main(int argc, char** argv)
 	}
 
 	stb = fopen(output_stb, "w");
+	/*
 	for (int j = 0; j < 100; j++)
 	{
 		if (table[0][j] == "0")
@@ -248,7 +252,6 @@ int main(int argc, char** argv)
 		else
 		{
 			int i = true_address[j];
-			int integer;
 
 			char cstr[20];
 			strcpy(cstr, table[0][j].c_str());
@@ -256,6 +259,7 @@ int main(int argc, char** argv)
 			Push(cstr, strlen(cstr), value);
 		}
 	}
+	*/
 	insertionSort();
 	printList();
 	fprintf(stb, "Symbol	Value\n======	======\n");
@@ -302,8 +306,14 @@ void table_check_and_insert(char* token, int cnt, int loc, int mode)
 					table[k][i].append(loc_string);
 
 					if (mode == 1)
+					{
 						true_address[i] = k;
 
+						char cstr[20];
+						strcpy(cstr, table[0][i].c_str());
+						int value = std::stoi(table[k][i]);
+						Push(cstr, strlen(cstr), value);
+					}
 					exist_or_not = 1;
 					//cout << loc_string << endl;
 					break;
@@ -330,7 +340,13 @@ void table_check_and_insert(char* token, int cnt, int loc, int mode)
 				table[k][index].append(loc_string);
 
 				if (mode == 1)
+				{
 					true_address[index] = k;
+					char cstr[20];
+					strcpy(cstr, table[0][index].c_str());
+					int value = std::stoi(table[k][index]);
+					Push(cstr, strlen(cstr), value);
+				}
 
 				break;
 			}
