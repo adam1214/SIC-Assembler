@@ -47,6 +47,7 @@ int main(int argc, char** argv)
 	FILE *obj, *lst, *stb;
 	lst = fopen(output_lst, "w");
 	obj = fopen(output_obj, "w");
+	stb = fopen(output_stb, "w");
 	int mode;
 	int loc = -1;
 	if (argc == 2)
@@ -105,7 +106,7 @@ int main(int argc, char** argv)
 		strncpy(StrLine_copy, StrLine, 50);
 		token = strtok(StrLine, "\t"); /* get the first token */
 
-		if(cnt == 1)
+		if (cnt == 1)
 			fprintf(obj, "H%s	", token);
 
 		if (cnt == 2) {
@@ -217,7 +218,8 @@ int main(int argc, char** argv)
 			loc = loc + 3;
 		}
 	}
-
+	end_loc = loc;
+	fprintf(obj, "%06X\n", end_loc - start_loc);
 	for (int i = 0; i < 10; i++)
 	{
 		for (int j = 0; j < 17; j++)
@@ -227,7 +229,6 @@ int main(int argc, char** argv)
 		printf("\n");
 	}
 
-	stb = fopen(output_stb, "w");
 	insertionSort();
 	printList();
 
