@@ -31,6 +31,7 @@ void sortedInsert(struct node** head_ref, struct node* new_node);
 
 int main(int argc, char** argv)
 {
+	int start_loc, end_loc;
 	char output_lst[35] = "output/";
 	char output_obj[35] = "output/";
 	char output_stb[35] = "output/";
@@ -43,14 +44,14 @@ int main(int argc, char** argv)
 	strcat(output_obj, ".obj");
 	strcat(output_stb, ".stb");
 	string getstring;
-	FILE *ob, *lst, *stb;
+	FILE *obj, *lst, *stb;
 	lst = fopen(output_lst, "w");
+	obj = fopen(output_obj, "w");
 	int mode;
 	int loc = -1;
 	if (argc == 2)
 	{
 		mode = 0;
-		ob = fopen("output/test.obj", "w");
 	}
 	else if (argc == 3 && argv[2][1] == 's')
 	{
@@ -103,6 +104,10 @@ int main(int argc, char** argv)
 		++cnt;
 		strncpy(StrLine_copy, StrLine, 50);
 		token = strtok(StrLine, "\t"); /* get the first token */
+
+		if(cnt == 1)
+			fprintf(obj, "H%s	", token);
+
 		if (cnt == 2) {
 			string loc_string = int2str(loc);
 			table[1][0].clear();
@@ -113,25 +118,6 @@ int main(int argc, char** argv)
 		}
 		if (StrLine_copy[0] != '\t' && StrLine_copy[0] != '.') {
 			table_check_and_insert(token, cnt, loc, 1);
-			/*
-			string token_string(token);
-			table[0][index].clear();
-			table[0][index].append(token_string);
-			if (cnt > 1)
-			{
-			for (int k = 1; k < 100; k++)
-			{
-			if ("0" == table[k][index])
-			{
-			string loc_string = int2str(loc);
-			table[k][index].clear();
-			table[k][index].append(loc_string);
-			break;
-			}
-			}
-			}
-			index++;
-			*/
 		}
 		if (StrLine_copy[0] == '.')
 		{
@@ -188,6 +174,10 @@ int main(int argc, char** argv)
 			else if (type == 0) {
 				loc = strtol(token, NULL, 16);
 				sprintf(loc_char, "%d", loc);
+
+				fprintf(obj, "%06X", loc);
+				start_loc = loc;
+
 				type = -1;
 			}
 			else if (type == 1) {
@@ -226,10 +216,6 @@ int main(int argc, char** argv)
 		if (count == 0) {
 			loc = loc + 3;
 		}
-
-		//if (cnt == 52){
-		//break;
-		//}
 	}
 
 	for (int i = 0; i < 10; i++)
@@ -242,26 +228,9 @@ int main(int argc, char** argv)
 	}
 
 	stb = fopen(output_stb, "w");
-	/*
-	for (int j = 0; j < 100; j++)
-	{
-		if (table[0][j] == "0")
-		{
-			break;
-		}
-		else
-		{
-			int i = true_address[j];
-
-			char cstr[20];
-			strcpy(cstr, table[0][j].c_str());
-			int value = std::stoi(table[i][j]);
-			Push(cstr, strlen(cstr), value);
-		}
-	}
-	*/
 	insertionSort();
 	printList();
+
 	fprintf(stb, "Symbol	Value\n======	======\n");
 	struct node *temp = HEAD;
 	while (temp != NULL)
@@ -273,6 +242,7 @@ int main(int argc, char** argv)
 	fclose(stb);
 	fclose(fp);
 	fclose(lst);
+	fclose(obj);
 	system("pause");
 	return 0;
 }
