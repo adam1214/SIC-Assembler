@@ -28,9 +28,16 @@ void Push(char symbol[], int symbol_len, int value);
 void printList();
 void insertionSort();
 void sortedInsert(struct node** head_ref, struct node* new_node);
+char* ASCII_table(char token[]);
+char* op_table(char token[]);
+FILE *obj, *lst, *stb;
+char obj_content[1000000] = { '\0' };
+int half_byte_cnt = 0;
 
 int main(int argc, char** argv)
 {
+	char s[80] = { '\0' };
+	int first_dot = 1; //第一個點之前
 	int start_loc, end_loc;
 	char output_lst[35] = "output/";
 	char output_obj[35] = "output/";
@@ -44,7 +51,6 @@ int main(int argc, char** argv)
 	strcat(output_obj, ".obj");
 	strcat(output_stb, ".stb");
 	string getstring;
-	FILE *obj, *lst, *stb;
 	lst = fopen(output_lst, "w");
 	obj = fopen(output_obj, "w");
 	stb = fopen(output_stb, "w");
@@ -105,6 +111,21 @@ int main(int argc, char** argv)
 		++cnt;
 		strncpy(StrLine_copy, StrLine, 50);
 		token = strtok(StrLine, "\t"); /* get the first token */
+		char token_no_new_line[20];
+		strncpy(token_no_new_line, token, 20);
+		if (token_no_new_line[strlen(token_no_new_line) - 1] == '\n')
+		{
+			token_no_new_line[strlen(token_no_new_line) - 1] = '\0';
+		}
+		if (strcmp(token_no_new_line, "AND") == 0 || strcmp(token_no_new_line, "DIV") == 0 || strcmp(token_no_new_line, "J") == 0 || strcmp(token_no_new_line, "JEQ") == 0 || strcmp(token_no_new_line, "JGT") == 0 || strcmp(token_no_new_line, "JLT") == 0 || strcmp(token_no_new_line, "JSUB") == 0 || strcmp(token_no_new_line, "LDA") == 0 || strcmp(token_no_new_line, "LDCH") == 0 || strcmp(token_no_new_line, "LDL") == 0 || strcmp(token_no_new_line, "LDX") == 0 || strcmp(token_no_new_line, "MUL") == 0 || strcmp(token_no_new_line, "OR") == 0 || strcmp(token_no_new_line, "RSUB") == 0 || strcmp(token_no_new_line, "STA") == 0 || strcmp(token_no_new_line, "STCH") == 0 || strcmp(token_no_new_line, "STL") == 0 || strcmp(token_no_new_line, "STSW") == 0 || strcmp(token_no_new_line, "STX") == 0 || strcmp(token_no_new_line, "SUB") == 0)
+		{
+			char* op_string = op_table(token_no_new_line);
+			half_byte_cnt += 3;
+			if (half_byte_cnt > 30)
+			{
+
+			}
+		}
 
 		if (cnt == 1)
 			fprintf(obj, "H%s	", token);
@@ -116,12 +137,29 @@ int main(int argc, char** argv)
 
 			//更改cnt == 1在linked-list第一個node->value
 			HEAD->value = loc;
+			char loc_char[10];
+			sprintf(loc_char, "T%06X", loc);
+			strcat(obj_content, loc_char);
 		}
 		if (StrLine_copy[0] != '\t' && StrLine_copy[0] != '.') {
 			table_check_and_insert(token, cnt, loc, 1);
 		}
 		if (StrLine_copy[0] == '.')
 		{
+			if (first_dot == 1)
+			{
+				char half_byte_cnt_char[10];
+				sprintf(half_byte_cnt_char, "%02X", half_byte_cnt);
+				strcat(obj_content, half_byte_cnt_char);
+				half_byte_cnt = 0;
+				strcat(obj_content, s);
+
+				char loc_char[10];
+				sprintf(loc_char, "\nT%06X", loc);
+				strcat(obj_content, loc_char);
+			}
+			first_dot = 0;
+
 			type = 5;
 			fprintf(lst, "\t%s", StrLine_copy);
 			count = count + 1;
@@ -154,10 +192,27 @@ int main(int argc, char** argv)
 			}
 			else if (strcmp(token, "BYTE") == 0) {
 				type = 1;
+
+				if (first_dot == 1)
+				{
+					half_byte_cnt += 3;
+					if (half_byte_cnt > 30)
+					{
+
+					}
+				}
 				count = count + 1;
 			}
 			else if (strcmp(token, "WORD") == 0) {
 				type = 2;
+				if (first_dot == 1)
+				{
+					half_byte_cnt += 3;
+					if (half_byte_cnt > 30)
+					{
+
+					}
+				}
 				count = count + 1;
 			}
 			else if (strcmp(token, "RESW") == 0) {
@@ -185,15 +240,27 @@ int main(int argc, char** argv)
 				if (token[0] == 'X') {
 					loc = loc + 1;
 				}
-				else if (token[0] == 'C') {
+				else if (token[0] == 'C') {//token == "C'EOF'"
 					int length = strlen(token) - 4;
 					loc = loc + length;
 					sprintf(loc_char, "%d", loc);
+					char *str = ASCII_table(token);
+					strcat(s, str);
 				}
 				type = -1;
 			}
 			else if (type == 2) {
 				loc = loc + 3;
+
+				if (first_dot == 1)
+				{
+					token[strlen(token) - 1] = '\0'; //get rid of '\n' of token
+					int c2i = atoi(token);
+					char format_value[10];
+					sprintf(format_value, "%06X", c2i);
+					strcat(s, format_value);
+				}
+
 				type = -1;
 			}
 			else if (type == 3) {
@@ -220,6 +287,9 @@ int main(int argc, char** argv)
 	}
 	end_loc = loc;
 	fprintf(obj, "%06X\n", end_loc - start_loc);
+
+	fprintf(obj, "%s", obj_content);
+
 	for (int i = 0; i < 10; i++)
 	{
 		for (int j = 0; j < 17; j++)
@@ -284,6 +354,9 @@ void table_check_and_insert(char* token, int cnt, int loc, int mode)
 						strcpy(cstr, table[0][i].c_str());
 						int value = std::stoi(table[k][i]);
 						Push(cstr, strlen(cstr), value);
+
+						//half_byte_cnt = 0;
+						//strcat(obj_content, "\nT");
 					}
 					exist_or_not = 1;
 					//cout << loc_string << endl;
@@ -317,6 +390,10 @@ void table_check_and_insert(char* token, int cnt, int loc, int mode)
 					strcpy(cstr, table[0][index].c_str());
 					int value = std::stoi(table[k][index]);
 					Push(cstr, strlen(cstr), value);
+
+					//half_byte_cnt = 0;
+					//strcat(obj_content, "\nT");
+
 				}
 
 				break;
@@ -409,4 +486,244 @@ void sortedInsert(struct node** head_ref, struct node* new_node)
 		new_node->next = current->next;
 		current->next = new_node;
 	}
+}
+
+char* ASCII_table(char token[])
+{
+	//C'EOF'\n
+	//from token[2] to token[strlen(token) - 3]
+	char str[80] = { '\0' };
+	for (int i = 2; i <= strlen(token) - 3; i++)
+	{
+		if (token[i] == '0')
+		{
+			strcat(str, "30");
+		}
+		else if (token[i] == '1')
+		{
+			strcat(str, "31");
+		}
+		else if (token[i] == '2')
+		{
+			strcat(str, "32");
+		}
+		else if (token[i] == '3')
+		{
+			strcat(str, "33");
+		}
+		else if (token[i] == '4')
+		{
+			strcat(str, "34");
+		}
+		else if (token[i] == '5')
+		{
+			strcat(str, "35");
+		}
+		else if (token[i] == '6')
+		{
+			strcat(str, "36");
+		}
+		else if (token[i] == '7')
+		{
+			strcat(str, "37");
+		}
+		else if (token[i] == '8')
+		{
+			strcat(str, "38");
+		}
+		else if (token[i] == '9')
+		{
+			strcat(str, "39");
+		}
+		else if (token[i] == 'A')
+		{
+			strcat(str, "41");
+		}
+		else if (token[i] == 'B')
+		{
+			strcat(str, "42");
+		}
+		else if (token[i] == 'C')
+		{
+			strcat(str, "43");
+		}
+		else if (token[i] == 'D')
+		{
+			strcat(str, "44");
+		}
+		else if (token[i] == 'E')
+		{
+			strcat(str, "45");
+		}
+		else if (token[i] == 'F')
+		{
+			strcat(str, "46");
+		}
+		else if (token[i] == 'G')
+		{
+			strcat(str, "47");
+		}
+		else if (token[i] == 'H')
+		{
+			strcat(str, "48");
+		}
+		else if (token[i] == 'I')
+		{
+			strcat(str, "49");
+		}
+		else if (token[i] == 'J')
+		{
+			strcat(str, "4A");
+		}
+		else if (token[i] == 'K')
+		{
+			strcat(str, "4B");
+		}
+		else if (token[i] == 'L')
+		{
+			strcat(str, "4C");
+		}
+		else if (token[i] == 'M')
+		{
+			strcat(str, "4D");
+		}
+		else if (token[i] == 'N')
+		{
+			strcat(str, "4E");
+		}
+		else if (token[i] == 'O')
+		{
+			strcat(str, "4F");
+		}
+		else if (token[i] == 'P')
+		{
+			strcat(str, "50");
+		}
+		else if (token[i] == 'Q')
+		{
+			strcat(str, "51");
+		}
+		else if (token[i] == 'R')
+		{
+			strcat(str, "52");
+		}
+		else if (token[i] == 'S')
+		{
+			strcat(str, "53");
+		}
+		else if (token[i] == 'T')
+		{
+			strcat(str, "54");
+		}
+		else if (token[i] == 'U')
+		{
+			strcat(str, "55");
+		}
+		else if (token[i] == 'V')
+		{
+			strcat(str, "56");
+		}
+		else if (token[i] == 'W')
+		{
+			strcat(str, "57");
+		}
+		else if (token[i] == 'X')
+		{
+			strcat(str, "58");
+		}
+		else if (token[i] == 'Y')
+		{
+			strcat(str, "59");
+		}
+		else if (token[i] == 'Z')
+		{
+			strcat(str, "5A");
+		}
+	}
+	return str;
+}
+
+char* op_table(char token[])
+{
+	if (strcmp(token, "AND") == 0)
+	{
+		return "40";
+	}
+	else if (strcmp(token, "DIV") == 0)
+	{
+		return "24";
+	}
+	else if (strcmp(token, "J") == 0)
+	{
+		return "3C";
+	}
+	else if (strcmp(token, "JEQ") == 0)
+	{
+		return "30";
+	}
+	else if (strcmp(token, "JGT") == 0)
+	{
+		return "34";
+	}
+	else if (strcmp(token, "JLT") == 0)
+	{
+		return "38";
+	}
+	else if (strcmp(token, "JSUB") == 0)
+	{
+		return "48";
+	}
+	else if (strcmp(token, "LDA") == 0)
+	{
+		return "00";
+	}
+	else if (strcmp(token, "LDCH") == 0)
+	{
+		return "50";
+	}
+	else if (strcmp(token, "LDL") == 0)
+	{
+		return "08";
+	}
+	else if (strcmp(token, "LDX") == 0)
+	{
+		return "04";
+	}
+	else if (strcmp(token, "MUL") == 0)
+	{
+		return "20";
+	}
+	else if (strcmp(token, "OR") == 0)
+	{
+		return "44";
+	}
+	else if (strcmp(token, "RSUB") == 0)
+	{
+		return "4C";
+	}
+	else if (strcmp(token, "STA") == 0)
+	{
+		return "0C";
+	}
+	else if (strcmp(token, "STCH") == 0)
+	{
+		return "54";
+	}
+	else if (strcmp(token, "STL") == 0)
+	{
+		return "14";
+	}
+	else if (strcmp(token, "STSW") == 0)
+	{
+		return "E8";
+	}
+	else if (strcmp(token, "STX") == 0)
+	{
+		return "10";
+	}
+	else if (strcmp(token, "SUB") == 0)
+	{
+		return "1C";
+	}
+
 }
