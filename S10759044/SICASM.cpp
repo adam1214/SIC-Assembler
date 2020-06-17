@@ -18,11 +18,14 @@ struct node {
 struct node* HEAD = NULL;
 struct node* TAIL = NULL;
 int node_cnt = 0;
-
 int true_address[100] = { 0 };
 vector<vector<string> > table;
 int index = 0;
 string int2str(int i);
+FILE *obj, *lst, *stb;
+char obj_content[1000000] = { '\0' };
+int half_byte_cnt = 0;
+
 void table_check_and_insert(char* token, int cnt, int loc, int mode);
 void Push(char symbol[], int symbol_len, int value);
 void printList();
@@ -30,9 +33,7 @@ void insertionSort();
 void sortedInsert(struct node** head_ref, struct node* new_node);
 char* ASCII_table(char token[]);
 char* op_table(char token[]);
-FILE *obj, *lst, *stb;
-char obj_content[1000000] = { '\0' };
-int half_byte_cnt = 0;
+char* travel_list(char token[]);
 
 int main(int argc, char** argv)
 {
@@ -104,6 +105,7 @@ int main(int argc, char** argv)
 	}
 	while (!feof(fp))
 	{
+		int var_or_subr = 0; //1是var; 2是subr; 3可能是var或subr
 		int count = 0;
 		int count1 = 0;
 		char loc_char[100];
@@ -111,21 +113,25 @@ int main(int argc, char** argv)
 		++cnt;
 		strncpy(StrLine_copy, StrLine, 50);
 		token = strtok(StrLine, "\t"); /* get the first token */
-		char token_no_new_line[20];
-		strncpy(token_no_new_line, token, 20);
-		if (token_no_new_line[strlen(token_no_new_line) - 1] == '\n')
-		{
-			token_no_new_line[strlen(token_no_new_line) - 1] = '\0';
-		}
-		if (strcmp(token_no_new_line, "AND") == 0 || strcmp(token_no_new_line, "DIV") == 0 || strcmp(token_no_new_line, "J") == 0 || strcmp(token_no_new_line, "JEQ") == 0 || strcmp(token_no_new_line, "JGT") == 0 || strcmp(token_no_new_line, "JLT") == 0 || strcmp(token_no_new_line, "JSUB") == 0 || strcmp(token_no_new_line, "LDA") == 0 || strcmp(token_no_new_line, "LDCH") == 0 || strcmp(token_no_new_line, "LDL") == 0 || strcmp(token_no_new_line, "LDX") == 0 || strcmp(token_no_new_line, "MUL") == 0 || strcmp(token_no_new_line, "OR") == 0 || strcmp(token_no_new_line, "RSUB") == 0 || strcmp(token_no_new_line, "STA") == 0 || strcmp(token_no_new_line, "STCH") == 0 || strcmp(token_no_new_line, "STL") == 0 || strcmp(token_no_new_line, "STSW") == 0 || strcmp(token_no_new_line, "STX") == 0 || strcmp(token_no_new_line, "SUB") == 0)
-		{
-			char* op_string = op_table(token_no_new_line);
-			half_byte_cnt += 3;
-			if (half_byte_cnt > 30)
-			{
-
-			}
-		}
+									   /*
+									   char token_no_new_line[20] = { '\0' };
+									   strncpy(token_no_new_line, token, 20);
+									   if (token_no_new_line[strlen(token_no_new_line) - 1] == '\n')
+									   {
+									   token_no_new_line[strlen(token_no_new_line) - 1] = '\0';
+									   }
+									   if (strcmp(token_no_new_line, "AND") == 0 || strcmp(token_no_new_line, "DIV") == 0 || strcmp(token_no_new_line, "J") == 0 || strcmp(token_no_new_line, "JEQ") == 0 || strcmp(token_no_new_line, "JGT") == 0 || strcmp(token_no_new_line, "JLT") == 0 || strcmp(token_no_new_line, "JSUB") == 0 || strcmp(token_no_new_line, "LDA") == 0 || strcmp(token_no_new_line, "LDCH") == 0 || strcmp(token_no_new_line, "LDL") == 0 || strcmp(token_no_new_line, "LDX") == 0 || strcmp(token_no_new_line, "MUL") == 0 || strcmp(token_no_new_line, "OR") == 0 || strcmp(token_no_new_line, "RSUB") == 0 || strcmp(token_no_new_line, "STA") == 0 || strcmp(token_no_new_line, "STCH") == 0 || strcmp(token_no_new_line, "STL") == 0 || strcmp(token_no_new_line, "STSW") == 0 || strcmp(token_no_new_line, "STX") == 0 || strcmp(token_no_new_line, "SUB") == 0)
+									   {
+									   char* op_string = op_table(token_no_new_line);
+									   strcat(obj_content, op_string);
+									   half_byte_cnt += 3;
+									   if (half_byte_cnt > 30)
+									   {
+									   strcat(obj_content, "\nT");
+									   half_byte_cnt = 0;
+									   }
+									   }
+									   */
 
 		if (cnt == 1)
 			fprintf(obj, "H%s	", token);
@@ -143,6 +149,7 @@ int main(int argc, char** argv)
 		}
 		if (StrLine_copy[0] != '\t' && StrLine_copy[0] != '.') {
 			table_check_and_insert(token, cnt, loc, 1);
+			var_or_subr = 3; //可能是var或subr，須由下一個被切到的字判斷
 		}
 		if (StrLine_copy[0] == '.')
 		{
@@ -153,12 +160,13 @@ int main(int argc, char** argv)
 				strcat(obj_content, half_byte_cnt_char);
 				half_byte_cnt = 0;
 				strcat(obj_content, s);
+				memset(s, '\0', 80);
 
 				char loc_char[10];
 				sprintf(loc_char, "\nT%06X", loc);
 				strcat(obj_content, loc_char);
 			}
-			first_dot = 0;
+			first_dot = 2;
 
 			type = 5;
 			fprintf(lst, "\t%s", StrLine_copy);
@@ -198,7 +206,8 @@ int main(int argc, char** argv)
 					half_byte_cnt += 3;
 					if (half_byte_cnt > 30)
 					{
-
+						strcat(obj_content, "\nT");
+						half_byte_cnt = 0;
 					}
 				}
 				count = count + 1;
@@ -210,7 +219,8 @@ int main(int argc, char** argv)
 					half_byte_cnt += 3;
 					if (half_byte_cnt > 30)
 					{
-
+						strcat(obj_content, "\nT");
+						half_byte_cnt = 0;
 					}
 				}
 				count = count + 1;
@@ -276,6 +286,39 @@ int main(int argc, char** argv)
 
 			/* walk through other tokens */
 			token = strtok(NULL, "\t");
+			if (token != NULL)
+				strcat(s, travel_list(token));
+			if (first_dot > 1 && token != NULL && (strcmp(token, "AND") == 0 || strcmp(token, "DIV") == 0 || strcmp(token, "J") == 0 || strcmp(token, "JEQ") == 0 || strcmp(token, "JGT") == 0 || strcmp(token, "JLT") == 0 || strcmp(token, "JSUB") == 0 || strcmp(token, "LDA") == 0 || strcmp(token, "LDCH") == 0 || strcmp(token, "LDL") == 0 || strcmp(token, "LDX") == 0 || strcmp(token, "MUL") == 0 || strcmp(token, "OR") == 0 || strcmp(token, "RSUB") == 0 || strcmp(token, "STA") == 0 || strcmp(token, "STCH") == 0 || strcmp(token, "STL") == 0 || strcmp(token, "STSW") == 0 || strcmp(token, "STX") == 0 || strcmp(token, "SUB") == 0))
+			{
+				half_byte_cnt += 3;
+				if (half_byte_cnt <= 30)
+				{
+					char* op_string = op_table(token);
+					strcat(s, op_string);
+				}
+				else if (half_byte_cnt > 30)
+				{
+					strcat(obj_content, "\nT");
+					half_byte_cnt = 0;
+				}
+			}
+
+			if (first_dot > 1 && var_or_subr == 3 && strcmp(token, "BYTE") != 0 && strcmp(token, "WORD") != 0 && strcmp(token, "STL") != 0)
+			{
+				//find the true address of subr, and need to get newline in the obj file
+
+				char half_byte_cnt_char[10];
+				sprintf(half_byte_cnt_char, "%02X", half_byte_cnt);
+				strcat(obj_content, half_byte_cnt_char);
+				half_byte_cnt = 0;
+				strcat(obj_content, s);
+				memset(s, '\0', 80);
+
+				char loc_char[10];
+				sprintf(loc_char, "\nT%06X", loc);
+				strcat(obj_content, loc_char);
+			}
+			var_or_subr = 0;
 		}
 		if (cnt == 1 && type != 5 && count1 == 1) {
 			fprintf(lst, "%05X	", loc);
@@ -283,6 +326,11 @@ int main(int argc, char** argv)
 		}
 		if (count == 0) {
 			loc = loc + 3;
+		}
+
+		if (cnt == 16)
+		{
+			break;
 		}
 	}
 	end_loc = loc;
@@ -354,9 +402,6 @@ void table_check_and_insert(char* token, int cnt, int loc, int mode)
 						strcpy(cstr, table[0][i].c_str());
 						int value = std::stoi(table[k][i]);
 						Push(cstr, strlen(cstr), value);
-
-						//half_byte_cnt = 0;
-						//strcat(obj_content, "\nT");
 					}
 					exist_or_not = 1;
 					//cout << loc_string << endl;
@@ -390,12 +435,7 @@ void table_check_and_insert(char* token, int cnt, int loc, int mode)
 					strcpy(cstr, table[0][index].c_str());
 					int value = std::stoi(table[k][index]);
 					Push(cstr, strlen(cstr), value);
-
-					//half_byte_cnt = 0;
-					//strcat(obj_content, "\nT");
-
 				}
-
 				break;
 			}
 		}
@@ -725,5 +765,29 @@ char* op_table(char token[])
 	{
 		return "1C";
 	}
+}
 
+char* travel_list(char token[])
+{
+	char *token_copy = (char *)malloc(strlen(token) + 1);
+	strcpy(token_copy, token);
+	if (token_copy != NULL)
+	{
+		if (token_copy[strlen(token_copy) - 1] == '\n')
+		{
+			token_copy[strlen(token_copy) - 1] = '\0';
+		}
+	}
+	struct node *temp = HEAD;
+	while (temp != NULL)
+	{
+		if (token_copy != NULL && strcmp(temp->symbol, token_copy) == 0)
+		{
+			char format_val[20];
+			sprintf(format_val, "%04X", temp->value);
+			return format_val;
+		}
+		temp = temp->next;
+	}
+	return "";
 }
