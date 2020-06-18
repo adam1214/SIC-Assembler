@@ -32,13 +32,15 @@ void printList();
 void insertionSort();
 void sortedInsert(struct node** head_ref, struct node* new_node);
 char* ASCII_table(char token[]);
-char* op_table(char token[]);
-char* travel_list(char token[]);
+const char* op_table(char token[]);
+const char* travel_list(char token[]);
 
 int main(int argc, char** argv)
 {
+	char pre_token[20] = { '\0' };
 	char s[80] = { '\0' };
 	int first_dot = 1; //第一個點之前
+	int first_dot_cnt = 0;
 	int start_loc, end_loc;
 	char output_lst[35] = "output/";
 	char output_obj[35] = "output/";
@@ -105,7 +107,7 @@ int main(int argc, char** argv)
 	}
 	while (!feof(fp))
 	{
-		int var_or_subr = 0; //1是var; 2是subr; 3可能是var或subr
+		int var_or_subr = 0; //1是var; 2是subr; 3可能是var或subr; 4必定是subr在定義前被呼叫過，故不換行
 		int count = 0;
 		int count1 = 0;
 		char loc_char[100];
@@ -113,6 +115,8 @@ int main(int argc, char** argv)
 		++cnt;
 		strncpy(StrLine_copy, StrLine, 50);
 		token = strtok(StrLine, "\t"); /* get the first token */
+		memset(pre_token, '\0', 20);
+		strcpy(pre_token, token);
 									   /*
 									   char token_no_new_line[20] = { '\0' };
 									   strncpy(token_no_new_line, token, 20);
@@ -165,6 +169,7 @@ int main(int argc, char** argv)
 				char loc_char[10];
 				sprintf(loc_char, "\nT%06X", loc);
 				strcat(obj_content, loc_char);
+				first_dot_cnt = cnt;
 			}
 			first_dot = 2;
 
@@ -206,8 +211,8 @@ int main(int argc, char** argv)
 					half_byte_cnt += 3;
 					if (half_byte_cnt > 30)
 					{
-						strcat(obj_content, "\nT");
-						half_byte_cnt = 0;
+						//strcat(obj_content, "\nT");
+						//half_byte_cnt = 0;
 					}
 				}
 				count = count + 1;
@@ -219,8 +224,8 @@ int main(int argc, char** argv)
 					half_byte_cnt += 3;
 					if (half_byte_cnt > 30)
 					{
-						strcat(obj_content, "\nT");
-						half_byte_cnt = 0;
+						//strcat(obj_content, "\nT");
+						//half_byte_cnt = 0;
 					}
 				}
 				count = count + 1;
@@ -293,20 +298,37 @@ int main(int argc, char** argv)
 				half_byte_cnt += 3;
 				if (half_byte_cnt <= 30)
 				{
-					char* op_string = op_table(token);
+					const char* op_string = op_table(token);
 					strcat(s, op_string);
 				}
 				else if (half_byte_cnt > 30)
 				{
-					strcat(obj_content, "\nT");
-					half_byte_cnt = 0;
+					//strcat(obj_content, "\nT");
+					//half_byte_cnt = 0;
 				}
 			}
-
-			if (first_dot > 1 && var_or_subr == 3 && strcmp(token, "BYTE") != 0 && strcmp(token, "WORD") != 0 && strcmp(token, "STL") != 0)
+			if (var_or_subr == 3 && strcmp(token, "BYTE") != 0 && strcmp(token, "WORD") != 0)
+			{
+				//還要判斷這個subr是否為先定義還未被呼叫，如果是如此，也不在obj file換行
+				for (int i = 0; i < 100; i++)
+				{
+					char cstr[20];
+					strcpy(cstr, table[0][i].c_str());
+					
+					if (strcmp(cstr, pre_token) == 0)
+					{
+						if (true_address[i] > 1)
+						{
+							var_or_subr = 4;
+							break;
+						}
+					}
+				}
+			}
+			if (cnt > first_dot_cnt + 1 && first_dot > 1 && var_or_subr == 4)
 			{
 				//find the true address of subr, and need to get newline in the obj file
-
+				printf("SSSSSSSSSSSSS=%s\n", pre_token);
 				char half_byte_cnt_char[10];
 				sprintf(half_byte_cnt_char, "%02X", half_byte_cnt);
 				strcat(obj_content, half_byte_cnt_char);
@@ -319,6 +341,9 @@ int main(int argc, char** argv)
 				strcat(obj_content, loc_char);
 			}
 			var_or_subr = 0;
+			memset(pre_token, '\0', 20);
+			if(token != NULL)
+				strcpy(pre_token, token);
 		}
 		if (cnt == 1 && type != 5 && count1 == 1) {
 			fprintf(lst, "%05X	", loc);
@@ -683,7 +708,7 @@ char* ASCII_table(char token[])
 	return str;
 }
 
-char* op_table(char token[])
+const char* op_table(char token[])
 {
 	if (strcmp(token, "AND") == 0)
 	{
@@ -767,7 +792,7 @@ char* op_table(char token[])
 	}
 }
 
-char* travel_list(char token[])
+const char* travel_list(char token[])
 {
 	char *token_copy = (char *)malloc(strlen(token) + 1);
 	strcpy(token_copy, token);
