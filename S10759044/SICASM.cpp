@@ -37,6 +37,7 @@ const char* travel_list(char token[]);
 
 int main(int argc, char** argv)
 {
+	int at_end_or_not = 0;
 	char pre_token[20] = { '\0' };
 	char s[80] = { '\0' };
 	int first_dot = 1; //第一個點之前
@@ -119,10 +120,11 @@ int main(int argc, char** argv)
 		strncpy(StrLine_copy, StrLine, 50);
 		token = strtok(StrLine, "\t"); /* get the first token */
 		memset(pre_token, '\0', 20);
-		strcpy(pre_token, token);
+		if (token != NULL)
+			strcpy(pre_token, token);
 		if (first_dot > 1 && token != NULL)
 		{
-			printf("VVVVVVVVVVVVVVVVVVVV = %s\n", token);
+			//printf("VVVVVVVVVVVVVVVVVVVV = %s\n", token);
 			if (half_byte_cnt > 30)
 			{
 				//strcat(obj_content, "\nT");
@@ -133,9 +135,21 @@ int main(int argc, char** argv)
 				strcat(s, op_table(token));
 			}
 		}
-		if (strcmp(token, "END") == 0)
+		if (token != NULL && strcmp(token, "END") == 0)
 		{
 			half_byte_cnt -= 3;
+
+			//find the end of the .asm file
+			printf("DDDDDDDDDDDDD=%s\n", pre_token);
+			char half_byte_cnt_char[10];
+			sprintf(half_byte_cnt_char, "%02X", half_byte_cnt - 3);
+			strcat(obj_content, half_byte_cnt_char);
+			half_byte_cnt = 3;
+			strcat(obj_content, s);
+			memset(s, '\0', 80);
+
+			strcat(obj_content, "\nE");
+			at_end_or_not = 1;
 		}
 		if (cnt == 1)
 			fprintf(obj, "H%s	", token);
@@ -281,7 +295,6 @@ int main(int argc, char** argv)
 
 			/* walk through other tokens */
 			token = strtok(NULL, "\t");
-
 			if (var_or_subr == 3 && strcmp(token, "BYTE") != 0 && strcmp(token, "WORD") != 0)
 			{
 				//還要判斷這個subr是否為先定義還未被呼叫，如果是如此，也不在obj file換行
@@ -303,7 +316,7 @@ int main(int argc, char** argv)
 			if (cnt > first_dot_cnt + 1 && first_dot > 1 && var_or_subr == 4)
 			{
 				//find the true address of subr, and need to get newline in the obj file
-				printf("SSSSSSSSSSSSS=%s\n", pre_token);
+				//printf("SSSSSSSSSSSSS=%s\n", pre_token);
 				char half_byte_cnt_char[10];
 				sprintf(half_byte_cnt_char, "%02X", half_byte_cnt - 3);
 				strcat(obj_content, half_byte_cnt_char);
@@ -312,7 +325,6 @@ int main(int argc, char** argv)
 				memset(s, '\0', 80);
 
 				strcat(obj_content, "\nT");
-				char loc_char[20];
 				int is_break = 0;
 				for (int k = 0; k < 100; k++) //橫向搜索第0列table
 				{
@@ -325,10 +337,10 @@ int main(int argc, char** argv)
 								is_break = 1;
 								break;
 							}
-							else if (stoi(table[m + 1][k]) != 0)
+							if (stoi(table[m + 1][k]) != 0)
 							{
 								int value = std::stoi(table[m][k]);
-								sprintf(loc_char, "%06X", ++value);
+								sprintf(loc_char, "%06X02%04X\nT", ++value, loc);
 								strcat(obj_content, loc_char);
 							}
 						}
@@ -339,7 +351,7 @@ int main(int argc, char** argv)
 					}
 				}
 
-				sprintf(loc_char, "02%04X\nT%06X", loc, loc);
+				sprintf(loc_char, "%06X", loc);
 				strcat(obj_content, loc_char);
 				strcat(s, op_table(token));
 			}
@@ -362,6 +374,11 @@ int main(int argc, char** argv)
 				if (strcmp(travel_list(token), "0000") == 0 && (cnt == 24 || cnt == 25))
 					printf("FFFFFFFFFFFFFF=%s\n", token);
 				strcat(s, travel_list(token));
+				if (at_end_or_not == 1)
+				{
+					strcat(obj_content, "00");
+					strcat(obj_content, travel_list(token));
+				}
 			}
 			var_or_subr = 0;
 			memset(pre_token, '\0', 20);
@@ -376,13 +393,14 @@ int main(int argc, char** argv)
 			loc = loc + 3;
 		}
 
-		if (cnt == 27)
-		{
-			break;
-		}
+		//if (cnt == 49)
+		//{
+		//break;
+		//}
 	}
+	printf("end_loc = %X\n", loc);
 	end_loc = loc;
-	fprintf(obj, "%06X\n", end_loc - start_loc);
+	fprintf(obj, "%06X\n", end_loc - start_loc - 3);
 
 	fprintf(obj, "%s", obj_content);
 
@@ -883,12 +901,21 @@ const char* travel_list(char token[])
 		}
 	}
 	struct node *temp = HEAD;
+	char plus_flag_bit[20];
 	while (temp != NULL)
 	{
+		sprintf(plus_flag_bit, "%s,X", temp->symbol);
 		if (token_copy != NULL && strcmp(temp->symbol, token_copy) == 0)
 		{
 			char format_val[20];
 			sprintf(format_val, "%04X", temp->value);
+			free(token_copy);
+			return format_val;
+		}
+		else if (token_copy != NULL && strcmp(plus_flag_bit, token_copy) == 0)
+		{
+			char format_val[20];
+			sprintf(format_val, "%04X", temp->value + 32768);
 			free(token_copy);
 			return format_val;
 		}
