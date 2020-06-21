@@ -1,8 +1,10 @@
 ﻿  SICASM.cpp
-c:\users\88691\desktop\s10759044\s10759044\sicasm.cpp(259): warning C4267: '正在初始化': 將 'size_t' 轉換為 'int'，資料可能遺失
-c:\users\88691\desktop\s10759044\s10759044\sicasm.cpp(429): warning C4267: '引數': 將 'size_t' 轉換為 'int'，資料可能遺失
-c:\users\88691\desktop\s10759044\s10759044\sicasm.cpp(462): warning C4267: '引數': 將 'size_t' 轉換為 'int'，資料可能遺失
-c:\users\88691\desktop\s10759044\s10759044\sicasm.cpp(793): warning C4715: 'op_table': 不是所有控制路徑都傳回值
-c:\users\88691\desktop\s10759044\s10759044\sicasm.cpp(708): warning C4172: 傳回區域變數或暫存的位址: str
-c:\users\88691\desktop\s10759044\s10759044\sicasm.cpp(813): warning C4172: 傳回區域變數或暫存的位址: format_val
+c:\users\88691\desktop\s10759044\s10759044\sicasm.cpp(261): warning C4267: '=': 將 'size_t' 轉換為 'int'，資料可能遺失
+c:\users\88691\desktop\s10759044\s10759044\sicasm.cpp(268): warning C4267: '=': 將 'size_t' 轉換為 'int'，資料可能遺失
+c:\users\88691\desktop\s10759044\s10759044\sicasm.cpp(269): warning C4267: '正在初始化': 將 'size_t' 轉換為 'int'，資料可能遺失
+c:\users\88691\desktop\s10759044\s10759044\sicasm.cpp(476): warning C4267: '引數': 將 'size_t' 轉換為 'int'，資料可能遺失
+c:\users\88691\desktop\s10759044\s10759044\sicasm.cpp(509): warning C4267: '引數': 將 'size_t' 轉換為 'int'，資料可能遺失
+c:\users\88691\desktop\s10759044\s10759044\sicasm.cpp(755): warning C4172: 傳回區域變數或暫存的位址: str
+c:\users\88691\desktop\s10759044\s10759044\sicasm.cpp(919): warning C4172: 傳回區域變數或暫存的位址: format_val
+c:\users\88691\desktop\s10759044\s10759044\sicasm.cpp(926): warning C4172: 傳回區域變數或暫存的位址: format_val
   S10759044.vcxproj -> C:\Users\88691\Desktop\S10759044\x64\Debug\S10759044.exe

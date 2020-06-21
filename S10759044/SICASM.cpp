@@ -106,7 +106,7 @@ int main(int argc, char** argv)
 			table[i][j].append("0");
 		}
 	}
-	while (!feof(fp))
+	while (true)
 	{
 		int comment_or_not = 0;
 		int var_or_subr = 0; //1是var; 2是subr; 3可能是var或subr; 4必定是subr在定義前被呼叫過，故不換行
@@ -114,11 +114,17 @@ int main(int argc, char** argv)
 		int count1 = 0;
 		char loc_char[100];
 		fgets(StrLine, 50, fp);  //讀取一行
+		if (feof(fp))
+			break;
 		++cnt;
 		if (cnt > 1)
 			half_byte_cnt += 3;
 		strncpy(StrLine_copy, StrLine, 50);
 		token = strtok(StrLine, "\t"); /* get the first token */
+		if (cnt == 51)
+		{
+			printf("FFFFFFFFFF = %s\n", token);
+		}
 		memset(pre_token, '\0', 20);
 		if (token != NULL)
 			strcpy(pre_token, token);
@@ -140,7 +146,7 @@ int main(int argc, char** argv)
 			half_byte_cnt -= 3;
 
 			//find the end of the .asm file
-			printf("DDDDDDDDDDDDD=%s\n", pre_token);
+			printf("DDDDDDDDDDDDD=%s\n", token);
 			char half_byte_cnt_char[10];
 			sprintf(half_byte_cnt_char, "%02X", half_byte_cnt - 3);
 			strcat(obj_content, half_byte_cnt_char);
@@ -400,7 +406,7 @@ int main(int argc, char** argv)
 	}
 	printf("end_loc = %X\n", loc);
 	end_loc = loc;
-	fprintf(obj, "%06X\n", end_loc - start_loc - 3);
+	fprintf(obj, "%06X\n", end_loc - start_loc);
 
 	fprintf(obj, "%s", obj_content);
 
