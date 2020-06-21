@@ -307,8 +307,35 @@ int main(int argc, char** argv)
 				strcat(obj_content, s);
 				memset(s, '\0', 80);
 
+				strcat(obj_content, "\nT");
 				char loc_char[10];
-				sprintf(loc_char, "\nT%06X", loc);
+				int is_break = 0;
+				for (int k = 0; k < 100; k++) //橫向搜索第0列table
+				{
+					if (table[0][k] == pre_token)
+					{
+						for (int m = 1; m < 10; m++)
+						{
+							if (stoi(table[m][k]) == 0)
+							{
+								is_break = 1;
+								break;
+							}
+							else if (stoi(table[m + 1][k]) != 0)
+							{
+								int value = std::stoi(table[m][k]);
+								sprintf(loc_char, "%06X", ++value);
+								strcat(obj_content, loc_char);
+							}
+						}
+					}
+					if (is_break == 1)
+					{
+						break;
+					}
+				}
+
+				sprintf(loc_char, "02%04X", loc);
 				strcat(obj_content, loc_char);
 			}
 			else if (first_dot > 1 && token != NULL && (strcmp(token, "AND") == 0 || strcmp(token, "DIV") == 0 || strcmp(token, "J") == 0 || strcmp(token, "JEQ") == 0 || strcmp(token, "JGT") == 0 || strcmp(token, "JLT") == 0 || strcmp(token, "JSUB") == 0 || strcmp(token, "LDA") == 0 || strcmp(token, "LDCH") == 0 || strcmp(token, "LDL") == 0 || strcmp(token, "LDX") == 0 || strcmp(token, "MUL") == 0 || strcmp(token, "OR") == 0 || strcmp(token, "RSUB") == 0 || strcmp(token, "STA") == 0 || strcmp(token, "STCH") == 0 || strcmp(token, "STL") == 0 || strcmp(token, "STSW") == 0 || strcmp(token, "STX") == 0 || strcmp(token, "SUB") == 0 || strcmp(token, "COMP") == 0 || strcmp(token, "RD") == 0 || strcmp(token, "TD") == 0 || strcmp(token, "TIX") == 0 || strcmp(token, "WD") == 0))
@@ -712,104 +739,130 @@ const char* op_table(char token[])
 	}
 	if (strcmp(token_copy, "AND") == 0)
 	{
+		free(token_copy);
 		return "40";
 	}
 	else if (strcmp(token_copy, "DIV") == 0)
 	{
+		free(token_copy);
 		return "24";
 	}
 	else if (strcmp(token_copy, "J") == 0)
 	{
+		free(token_copy);
 		return "3C";
 	}
 	else if (strcmp(token_copy, "JEQ") == 0)
 	{
+		free(token_copy);
 		return "30";
 	}
 	else if (strcmp(token_copy, "JGT") == 0)
 	{
+		free(token_copy);
 		return "34";
 	}
 	else if (strcmp(token_copy, "JLT") == 0)
 	{
+		free(token_copy);
 		return "38";
 	}
 	else if (strcmp(token_copy, "JSUB") == 0)
 	{
+		free(token_copy);
 		return "48";
 	}
 	else if (strcmp(token_copy, "LDA") == 0)
 	{
+		free(token_copy);
 		return "00";
 	}
 	else if (strcmp(token_copy, "LDCH") == 0)
 	{
+		free(token_copy);
 		return "50";
 	}
 	else if (strcmp(token_copy, "LDL") == 0)
 	{
+		free(token_copy);
 		return "08";
 	}
 	else if (strcmp(token_copy, "LDX") == 0)
 	{
+		free(token_copy);
 		return "04";
 	}
 	else if (strcmp(token_copy, "MUL") == 0)
 	{
+		free(token_copy);
 		return "20";
 	}
 	else if (strcmp(token_copy, "OR") == 0)
 	{
+		free(token_copy);
 		return "44";
 	}
 	else if (strcmp(token_copy, "RSUB") == 0)
 	{
+		free(token_copy);
 		return "4C0000";
 	}
 	else if (strcmp(token_copy, "STA") == 0)
 	{
+		free(token_copy);
 		return "0C";
 	}
 	else if (strcmp(token_copy, "STCH") == 0)
 	{
+		free(token_copy);
 		return "54";
 	}
 	else if (strcmp(token_copy, "STL") == 0)
 	{
+		free(token_copy);
 		return "14";
 	}
 	else if (strcmp(token_copy, "STSW") == 0)
 	{
+		free(token_copy);
 		return "E8";
 	}
 	else if (strcmp(token_copy, "STX") == 0)
 	{
+		free(token_copy);
 		return "10";
 	}
 	else if (strcmp(token_copy, "SUB") == 0)
 	{
+		free(token_copy);
 		return "1C";
 	}
 	else if (strcmp(token_copy, "COMP") == 0)
 	{
+		free(token_copy);
 		return "28";
 	}
 	else if (strcmp(token_copy, "RD") == 0)
 	{
+		free(token_copy);
 		return "D8";
 	}
 	else if (strcmp(token_copy, "TD") == 0)
 	{
+		free(token_copy);
 		return "E0";
 	}
 	else if (strcmp(token_copy, "TIX") == 0)
 	{
+		free(token_copy);
 		return "2C";
 	}
 	else if (strcmp(token_copy, "WD") == 0)
 	{
+		free(token_copy);
 		return "DC";
 	}
+	free(token_copy);
 	return "";
 }
 
@@ -831,9 +884,11 @@ const char* travel_list(char token[])
 		{
 			char format_val[20];
 			sprintf(format_val, "%04X", temp->value);
+			free(token_copy);
 			return format_val;
 		}
 		temp = temp->next;
 	}
+	free(token_copy);
 	return "0000";
 }
