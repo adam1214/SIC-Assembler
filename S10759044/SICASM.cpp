@@ -107,6 +107,7 @@ int main(int argc, char** argv)
 	}
 	while (!feof(fp))
 	{
+		int comment_or_not = 0;
 		int var_or_subr = 0; //1是var; 2是subr; 3可能是var或subr; 4必定是subr在定義前被呼叫過，故不換行
 		int count = 0;
 		int count1 = 0;
@@ -119,7 +120,7 @@ int main(int argc, char** argv)
 		token = strtok(StrLine, "\t"); /* get the first token */
 		memset(pre_token, '\0', 20);
 		strcpy(pre_token, token);
-		if (first_dot > 1 && token != NULL && (strcmp(token, "AND") == 0 || strcmp(token, "DIV") == 0 || strcmp(token, "J") == 0 || strcmp(token, "JEQ") == 0 || strcmp(token, "JGT") == 0 || strcmp(token, "JLT") == 0 || strcmp(token, "JSUB") == 0 || strcmp(token, "LDA") == 0 || strcmp(token, "LDCH") == 0 || strcmp(token, "LDL") == 0 || strcmp(token, "LDX") == 0 || strcmp(token, "MUL") == 0 || strcmp(token, "OR") == 0 || strcmp(token, "RSUB") == 0 || strcmp(token, "STA") == 0 || strcmp(token, "STCH") == 0 || strcmp(token, "STL") == 0 || strcmp(token, "STSW") == 0 || strcmp(token, "STX") == 0 || strcmp(token, "SUB") == 0 || strcmp(token, "COMP") == 0 || strcmp(token, "RD") == 0 || strcmp(token, "TD") == 0 || strcmp(token, "TIX") == 0 || strcmp(token, "WD") == 0))
+		if (first_dot > 1 && token != NULL)
 		{
 			printf("VVVVVVVVVVVVVVVVVVVV = %s\n", token);
 			if (half_byte_cnt > 30)
@@ -176,7 +177,7 @@ int main(int argc, char** argv)
 			type = 5;
 			fprintf(lst, "\t%s", StrLine_copy);
 			count = count + 1;
-
+			comment_or_not = 1;
 		}
 		if (cnt > 1 && type != 5 && type != 6)
 		{
@@ -236,9 +237,12 @@ int main(int argc, char** argv)
 				type = -1;
 			}
 			else if (type == 1) {
-				if (token[0] == 'X') {
+				if (token[0] == 'X') { //X'F1'\n	字串長度為6
 					half_byte_cnt = half_byte_cnt + (strlen(token) - 4) / 2 - 3;
 					loc = loc + 1;
+					char dest[10] = { 0 };
+					strncpy(dest, token + 2, strlen(token) - 4);
+					strcat(s, dest);
 				}
 				else if (token[0] == 'C') {//token == "C'EOF'\n"
 					half_byte_cnt = half_byte_cnt + (strlen(token) - 4) - 3;
@@ -253,7 +257,7 @@ int main(int argc, char** argv)
 			else if (type == 2) {
 				loc = loc + 3;
 
-				if (first_dot == 1)
+				//if (first_dot == 1)
 				{
 					token[strlen(token) - 1] = '\0'; //get rid of '\n' of token
 					int c2i = atoi(token);
@@ -303,12 +307,12 @@ int main(int argc, char** argv)
 				char half_byte_cnt_char[10];
 				sprintf(half_byte_cnt_char, "%02X", half_byte_cnt - 3);
 				strcat(obj_content, half_byte_cnt_char);
-				half_byte_cnt = 0;
+				half_byte_cnt = 3;
 				strcat(obj_content, s);
 				memset(s, '\0', 80);
 
 				strcat(obj_content, "\nT");
-				char loc_char[10];
+				char loc_char[20];
 				int is_break = 0;
 				for (int k = 0; k < 100; k++) //橫向搜索第0列table
 				{
@@ -335,10 +339,11 @@ int main(int argc, char** argv)
 					}
 				}
 
-				sprintf(loc_char, "02%04X", loc);
+				sprintf(loc_char, "02%04X\nT%06X", loc, loc);
 				strcat(obj_content, loc_char);
+				strcat(s, op_table(token));
 			}
-			else if (first_dot > 1 && token != NULL && (strcmp(token, "AND") == 0 || strcmp(token, "DIV") == 0 || strcmp(token, "J") == 0 || strcmp(token, "JEQ") == 0 || strcmp(token, "JGT") == 0 || strcmp(token, "JLT") == 0 || strcmp(token, "JSUB") == 0 || strcmp(token, "LDA") == 0 || strcmp(token, "LDCH") == 0 || strcmp(token, "LDL") == 0 || strcmp(token, "LDX") == 0 || strcmp(token, "MUL") == 0 || strcmp(token, "OR") == 0 || strcmp(token, "RSUB") == 0 || strcmp(token, "STA") == 0 || strcmp(token, "STCH") == 0 || strcmp(token, "STL") == 0 || strcmp(token, "STSW") == 0 || strcmp(token, "STX") == 0 || strcmp(token, "SUB") == 0 || strcmp(token, "COMP") == 0 || strcmp(token, "RD") == 0 || strcmp(token, "TD") == 0 || strcmp(token, "TIX") == 0 || strcmp(token, "WD") == 0))
+			else if (comment_or_not == 0 && first_dot > 1 && token != NULL && (strcmp(token, "AND") == 0 || strcmp(token, "DIV") == 0 || strcmp(token, "J") == 0 || strcmp(token, "JEQ") == 0 || strcmp(token, "JGT") == 0 || strcmp(token, "JLT") == 0 || strcmp(token, "JSUB") == 0 || strcmp(token, "LDA") == 0 || strcmp(token, "LDCH") == 0 || strcmp(token, "LDL") == 0 || strcmp(token, "LDX") == 0 || strcmp(token, "MUL") == 0 || strcmp(token, "OR") == 0 || strcmp(token, "RSUB") == 0 || strcmp(token, "STA") == 0 || strcmp(token, "STCH") == 0 || strcmp(token, "STL") == 0 || strcmp(token, "STSW") == 0 || strcmp(token, "STX") == 0 || strcmp(token, "SUB") == 0 || strcmp(token, "COMP") == 0 || strcmp(token, "RD") == 0 || strcmp(token, "TD") == 0 || strcmp(token, "TIX") == 0 || strcmp(token, "WD") == 0 || strcmp(token, "AND\n") == 0 || strcmp(token, "DIV\n") == 0 || strcmp(token, "J\n") == 0 || strcmp(token, "JEQ\n") == 0 || strcmp(token, "JGT\n") == 0 || strcmp(token, "JLT\n") == 0 || strcmp(token, "JSUB\n") == 0 || strcmp(token, "LDA\n") == 0 || strcmp(token, "LDCH\n") == 0 || strcmp(token, "LDL\n") == 0 || strcmp(token, "LDX\n") == 0 || strcmp(token, "MUL\n") == 0 || strcmp(token, "OR\n") == 0 || strcmp(token, "RSUB\n") == 0 || strcmp(token, "STA\n") == 0 || strcmp(token, "STCH\n") == 0 || strcmp(token, "STL\n") == 0 || strcmp(token, "STSW\n") == 0 || strcmp(token, "STX\n") == 0 || strcmp(token, "SUB\n") == 0 || strcmp(token, "COMP\n") == 0 || strcmp(token, "RD\n") == 0 || strcmp(token, "TD\n") == 0 || strcmp(token, "TIX\n") == 0 || strcmp(token, "WD\n") == 0))
 			{
 
 				op_table_is_check = 1;
@@ -352,9 +357,9 @@ int main(int argc, char** argv)
 					strcat(s, op_table(token));
 				}
 			}
-			else if (token != NULL && first_dot > 1 && op_table_is_check == 0)
+			else if (type != 1 && type != 2 && comment_or_not == 0 && token != NULL && strcmp(token, "WORD") != 0 && strcmp(token, "BYTE") != 0 && first_dot > 1 && op_table_is_check == 0)
 			{
-				if (strcmp(travel_list(token), "00") == 0)
+				if (strcmp(travel_list(token), "0000") == 0 && (cnt == 24 || cnt == 25))
 					printf("FFFFFFFFFFFFFF=%s\n", token);
 				strcat(s, travel_list(token));
 			}
@@ -371,7 +376,7 @@ int main(int argc, char** argv)
 			loc = loc + 3;
 		}
 
-		if (cnt == 16)
+		if (cnt == 27)
 		{
 			break;
 		}
