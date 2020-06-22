@@ -55,26 +55,33 @@ int main(int argc, char** argv)
 	strcat(output_obj, ".obj");
 	strcat(output_stb, ".stb");
 	string getstring;
-	lst = fopen(output_lst, "w");
-	obj = fopen(output_obj, "w");
-	stb = fopen(output_stb, "w");
-	int mode;
+	int option = 0;
 	int loc = -1;
-	if (argc == 2)
+	/*if (argc == 2)
 	{
 		mode = 0;
 	}
-	else if (argc == 3 && argv[2][1] == 's')
-	{
-		mode = 1;
+	*/
+	if (argc == 3 && argv[2][1] == 's')
+	{	
+		option = 1;
 	}
 	else if (argc == 3 && argv[2][1] == 't')
 	{
-		mode = 2;
+		option = 2;
 	}
-	else //default mode
+	else if (argc == 3 && argv[2][1] == 'a')
 	{
-		mode = 3;
+		option = 3;
+	}
+	if (option == 1 || option == 3)
+	{
+		lst = fopen(output_lst, "w");
+	}
+	obj = fopen(output_obj, "w");
+	if (option == 2 || option == 3) 
+	{
+		stb = fopen(output_stb, "w");
 	}
 	char filename[] = "input/test.asm"; //檔名
 	FILE *fp;
@@ -88,7 +95,10 @@ int main(int argc, char** argv)
 		system("pause");
 		return -1;
 	}
-	fprintf(lst, "Loc.	Source statement\n=====	==================================\n");
+	if (option == 1 || option == 3)
+	{
+		fprintf(lst, "Loc.	Source statement\n=====	==================================\n");
+	}
 	int cnt = 0;
 	int type = -1;
 	int j = 0;
@@ -148,7 +158,7 @@ int main(int argc, char** argv)
 			//find the end of the .asm file
 			printf("DDDDDDDDDDDDD=%s\n", token);
 			char half_byte_cnt_char[10];
-			sprintf(half_byte_cnt_char, "%02X", half_byte_cnt - 3);
+			sprintf(half_byte_cnt_char, "%02X", half_byte_cnt);
 			strcat(obj_content, half_byte_cnt_char);
 			half_byte_cnt = 3;
 			strcat(obj_content, s);
@@ -195,17 +205,23 @@ int main(int argc, char** argv)
 			first_dot = 2;
 
 			type = 5;
-			fprintf(lst, "\t%s", StrLine_copy);
+			if (option == 1 || option == 3)
+			{
+				fprintf(lst, "\t%s", StrLine_copy);
+			}
 			count = count + 1;
 			comment_or_not = 1;
 		}
 		if (cnt > 1 && type != 5 && type != 6)
 		{
-			if (strcmp(token, "END") != 0)
+			if (option == 1 || option == 3)
 			{
-				fprintf(lst, "%05X	", loc);
+				if (strcmp(token, "END") != 0)
+				{
+					fprintf(lst, "%05X	", loc);
+				}
+				fprintf(lst, "%s", StrLine_copy);
 			}
-			fprintf(lst, "%s", StrLine_copy);
 		}
 
 		type = -1;
@@ -392,8 +408,11 @@ int main(int argc, char** argv)
 				strcpy(pre_token, token);
 		}
 		if (cnt == 1 && type != 5 && count1 == 1) {
-			fprintf(lst, "%05X	", loc);
-			fprintf(lst, "%s", StrLine_copy);
+			if (option == 1 || option == 3)
+			{
+				fprintf(lst, "%05X	", loc);
+				fprintf(lst, "%s", StrLine_copy);
+			}
 		}
 		if (count == 0) {
 			loc = loc + 3;
@@ -421,18 +440,29 @@ int main(int argc, char** argv)
 
 	insertionSort();
 	printList();
-
-	fprintf(stb, "Symbol	Value\n======	======\n");
+	if (option == 2 || option == 3)
+	{
+		fprintf(stb, "Symbol	Value\n======	======\n");
+	}
 	struct node *temp = HEAD;
 	while (temp != NULL)
-	{
-		fprintf(stb, "%s	%05X\n", temp->symbol, temp->value);
-		temp = temp->next;
+	{	
+		if (option == 2 || option == 3) 
+		{
+			fprintf(stb, "%s	%05X\n", temp->symbol, temp->value);
+			temp = temp->next;
+		}
 	}
-
-	fclose(stb);
+	
+	if (option == 2 || option == 3)
+	{
+		fclose(stb);
+	}
 	fclose(fp);
-	fclose(lst);
+	if (option == 1 || option == 3)
+	{
+		fclose(lst);
+	}
 	fclose(obj);
 	system("pause");
 	return 0;
