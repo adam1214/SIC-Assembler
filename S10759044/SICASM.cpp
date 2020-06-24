@@ -57,11 +57,6 @@ int main(int argc, char** argv)
 	string getstring;
 	int option = 0;
 	int loc = -1;
-	/*if (argc == 2)
-	{
-		mode = 0;
-	}
-	*/
 	if (argc == 3 && argv[2][1] == 's')
 	{	
 		option = 1;
@@ -634,7 +629,7 @@ char* ASCII_table(char token[])
 {
 	//C'EOF'\n
 	//from token[2] to token[strlen(token) - 3]
-	char str[80] = { '\0' };
+	static char str[80] = { '\0' };
 	for (int i = 2; i <= strlen(token) - 3; i++)
 	{
 		if (token[i] == '0')
@@ -943,14 +938,14 @@ const char* travel_list(char token[])
 		sprintf(plus_flag_bit, "%s,X", temp->symbol);
 		if (token_copy != NULL && strcmp(temp->symbol, token_copy) == 0)
 		{
-			char format_val[20];
+			static char format_val[20];
 			sprintf(format_val, "%04X", temp->value);
 			free(token_copy);
 			return format_val;
 		}
 		else if (token_copy != NULL && strcmp(plus_flag_bit, token_copy) == 0)
 		{
-			char format_val[20];
+			static char format_val[20];
 			sprintf(format_val, "%04X", temp->value + 32768);
 			free(token_copy);
 			return format_val;
